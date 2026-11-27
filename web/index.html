@@ -207,9 +207,9 @@ td.v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:now
 {
 "use strict";
 
-const REPO = "https://github.com/kulakeepor/llm-graduation-exam";
-const REPO_READY = false; // 任务包仓库发布后改成 true
-const colab = nb => "https://colab.research.google.com/github/kulakeepor/llm-graduation-exam/blob/main/notebooks/" + nb;
+const REPO = "https://github.com/kulakeepor/llm-challenge";
+const REPO_READY = true; // 任务包仓库已发布
+const colab = nb => "https://colab.research.google.com/github/kulakeepor/llm-challenge/blob/main/notebooks/" + nb;
 const PROFILES = { t4: "Colab T4", mac: "我的 Mac" };
 const PROFILES_LONG = { t4: "Colab 免费 T4", mac: "自己的 Mac（Apple Silicon）" };
 
@@ -506,7 +506,7 @@ function viewHome() {
 }
 function footer() {
   return el("footer", { class: "foot" },
-    el("p", {}, "任务包、Colab 模板和本地裁判 ", el("code", { text: "grad_judge.py" }), " 会放在公开仓库 ", el("a", { href: REPO, target: "_blank", rel: "noopener", text: "kulakeepor/llm-graduation-exam" }), REPO_READY ? "。" : "（准备中，链接可能暂时打不开）。"),
+    el("p", {}, "任务包、Colab 模板和本地裁判 ", el("code", { text: "grad_judge.py" }), " 在公开仓库 ", el("a", { href: REPO, target: "_blank", rel: "noopener", text: "kulakeepor/llm-challenge" }), REPO_READY ? "，版本和更新记录也在那里。" : "（准备中，链接可能暂时打不开）。"),
     el("p", { text: "防造假的边界：训练发生在你自己的设备上，没有任何网页能彻底防止伪造。这份考核的可信度来自公开、可复现的证据：挑战码、代码指纹、公开仓库和答辩，别人随时可以克隆你的仓库重跑一遍。网页不信任成绩单里的任何\"通过\"字段，会用原始数值重新判定。" }),
     el("p", { text: "标\"暂定\"的阈值和算力预算，会在参考解法分别于 Colab T4 和 Apple Silicon Mac 上实测后校准。" }));
 }

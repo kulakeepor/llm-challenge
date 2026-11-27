@@ -2,6 +2,23 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号规则见 [docs/RELEASE.md](docs/RELEASE.md)。
 
+## [v3.1.0] - 2026-11-27
+
+阶段一任务包发布。
+
+### 新增
+- `judge/grad_judge.py`：本地裁判 v1.1（从作者的 Obsidian 原样迁入，未改动）。
+- `notebooks/s1_mini_gpt.ipynb`：阶段一 Colab 模板。环境检查、语料上传、训练循环（计时、验证 bpc、保存 `ckpt.pt` 和 `train_log.json`）、跑裁判都已写好；分词器、注意力、Block、KV Cache 生成留给学员。
+- `docs/my_gpt_interface.md`：接口约定和裁判检查项。
+- `.github/pull_request_template.md`。
+
+### 变更
+- 网页：仓库地址改为 `kulakeepor/llm-challenge`，Colab 链接指向本仓库，去掉“准备中”提示。
+
+### 测试
+- 端到端：按模板接口写一份最小参考实现（不入库），用模板训练单元格在 CPU 上训 20 步 → 裁判全部指标达标、生成成绩单 → 网页判定只报“设备不符：cpu”，与预期一致。
+- 网页 Playwright 85/85。
+
 ## [v3.0.0] - 2026-11-27
 
 网页 v3：按竞赛详情页重构。Artifact 版本 `1795746196-a90b`。
