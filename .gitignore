@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+# 学员本地产物
+*.pt
+*.ckpt
+corpus*.txt
+report_*.json
+train_log.json

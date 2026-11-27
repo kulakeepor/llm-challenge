@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>挑战大模型工程师</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* VOICE  考场 / 竞赛：冷静、精确、像一场正式比赛
+   IDEA   竞赛详情页：总览是关卡列表，每关一个详情页（标签 · 等宽大标题 · 深色考核面板 · 统计卡 · 标签页）
+   PICTURE 深色考核面板 + 通关后的红色印章
+   COLOUR zinc 灰阶，绿色=可挑战/通过，橙色=进行中，红色=印章（参考 Deep-ML 的配色与字体，按 Blue 要求）
+   TYPE   标题 JetBrains Mono 粗体，正文 Inter；中文回落到系统黑体 */
+:root{
+  color-scheme:light;
+  --bg:#fafafa; --card:#ffffff; --card2:#f4f4f5; --line:#e4e4e7; --line2:#d4d4d8;
+  --ink:#09090b; --muted:#52525b; --dim:#71717a;
+  --chip:#f4f4f5; --chip-ink:#3f3f46;
+  --green:#22c55e; --green-ink:#15803d; --green-soft:#dcfce7;
+  --orange-ink:#c2410c; --orange-soft:#ffedd5;
+  --red:#dc2626; --red-soft:#fee2e2; --link:#2563eb;
+  --btn:#18181b; --btn-ink:#fafafa;
+  --f-body:Inter,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,"PingFang SC","Microsoft YaHei",monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  color-scheme:dark;--bg:#09090b;--card:#111113;--card2:#18181b;--line:#27272a;--line2:#3f3f46;
+  --ink:#fafafa;--muted:#a1a1aa;--dim:#71717a;--chip:#27272a;--chip-ink:#d4d4d8;
+  --green-ink:#4ade80;--green-soft:rgba(34,197,94,.14);--orange-ink:#fb923c;--orange-soft:rgba(124,45,18,.3);
+  --red:#ef4444;--red-soft:rgba(127,29,29,.35);--link:#60a5fa;--btn:#f4f4f5;--btn-ink:#18181b}}
+:root[data-theme=dark]{
+  color-scheme:dark;--bg:#09090b;--card:#111113;--card2:#18181b;--line:#27272a;--line2:#3f3f46;
+  --ink:#fafafa;--muted:#a1a1aa;--dim:#71717a;--chip:#27272a;--chip-ink:#d4d4d8;
+  --green-ink:#4ade80;--green-soft:rgba(34,197,94,.14);--orange-ink:#fb923c;--orange-soft:rgba(124,45,18,.3);
+  --red:#ef4444;--red-soft:rgba(127,29,29,.35);--link:#60a5fa;--btn:#f4f4f5;--btn-ink:#18181b}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px);overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--f-body);overflow-x:clip;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.wrap{max-width:1120px;margin:0 auto;padding-block:24px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1,h2,h3,h4{font-family:var(--f-mono);margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(30px,5.4vw,52px);font-weight:700;letter-spacing:-.03em}
+h2{font-size:22px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:17px;font-weight:700}
+h4{font-size:14px;font-weight:700}
+p{margin:0}
+a{color:var(--link)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.small{font-size:13px;color:var(--muted)}
+.lede{color:var(--muted);font-size:16px;max-width:70ch;margin-top:10px}
+button,.btn{font:500 14px/1.2 var(--f-mono);border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--ink);padding:10px 14px;min-height:40px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+button:hover:not(:disabled),.btn:hover{border-color:var(--ink)}
+button.primary{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+button.primary:hover:not(:disabled){opacity:.9}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+textarea,input[type=text],input[type=url]{width:100%;font:16px/1.5 var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:10px 12px}
+textarea{resize:vertical;min-height:120px}
+textarea.code{font:13px/1.5 var(--f-mono);min-height:140px}
+input[type=file]{font-size:13px;color:var(--muted);max-width:100%}
+
+/* 标签 */
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tag{font:500 12px/1 var(--f-body);text-transform:uppercase;padding:6px 10px;border-radius:999px;background:var(--chip);color:var(--chip-ink);white-space:nowrap}
+.tag.passed{background:var(--green);color:#000}
+.tag.open{background:transparent;color:var(--green-ink);box-shadow:inset 0 0 0 1px var(--green)}
+.tag.half{background:var(--orange-soft);color:var(--orange-ink)}
+.tag.locked{background:var(--chip);color:var(--dim)}
+.back{font:500 13px var(--f-mono);color:var(--muted);text-decoration:none;align-self:flex-start;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.back:hover{color:var(--ink);border-color:var(--line2)}
+
+/* 总览头部 */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end}
+.score{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.score .big{font:700 44px/1 var(--f-mono)}
+.score .big small{font-size:18px;color:var(--dim)}
+.bar{display:flex;gap:4px}
+.bar i{width:24px;height:6px;border-radius:2px;background:var(--line2)}
+.bar i.on{background:var(--red)}
+@media (max-width:620px){.hero{grid-template-columns:1fr}.score{align-items:flex-start}}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;min-height:36px;padding:8px 12px}
+.seg button[aria-pressed=true]{background:var(--btn);color:var(--btn-ink)}
+.notice{font-size:13.5px;border-radius:10px;padding:10px 14px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.notice.warn{background:var(--orange-soft);color:var(--orange-ink);border-color:transparent}
+
+/* 关卡卡片 */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.lvl{position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;min-height:180px;transition:border-color .15s}
+.lvl:hover{border-color:var(--line2)}
+.lvl.locked{border:2px dashed var(--line2);background:transparent}
+.lvl.half{border-color:var(--orange-ink)}
+.lvl .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.lvl .code{font:500 13px var(--f-mono);color:var(--dim)}
+.lvl h3{font-size:19px}
+.lvl.locked h3{color:var(--muted)}
+.lvl .meta{font-size:13px;color:var(--muted);margin-top:auto;display:flex;flex-wrap:wrap;gap:4px 14px}
+.ev{display:flex;gap:4px}
+.ev i{width:18px;height:4px;border-radius:2px;background:var(--line2)}
+.ev i.on{background:var(--green)}
+.pf-entry{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+
+/* 印章 */
+.seal{position:absolute;right:16px;bottom:14px;width:74px;height:74px;border:3px solid var(--red);border-radius:10px;color:var(--red);display:grid;place-items:center;transform:rotate(-12deg);font:700 19px/1.05 var(--f-mono);text-align:center;opacity:.9;pointer-events:none;box-shadow:inset 0 0 0 3px var(--card),inset 0 0 0 4px var(--red)}
+.seal small{display:block;font-size:9.5px;font-weight:500;margin-top:4px}
+.seal.big{position:static;width:96px;height:96px;font-size:24px;flex:none;box-shadow:inset 0 0 0 3px var(--bg),inset 0 0 0 4px var(--red)}
+@media (prefers-reduced-motion:no-preference){.seal{animation:stamp .35s ease-out}@keyframes stamp{from{transform:rotate(-12deg) scale(1.6);opacity:0}to{transform:rotate(-12deg) scale(1);opacity:.9}}}
+.title-row{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.lvl.passed .meta{padding-right:84px}
+@media (max-width:620px){.seal.big{width:72px;height:72px;font-size:18px}}
+
+/* 考核面板（始终深色） */
+.panel{--ink:#fafafa;--muted:#a1a1aa;--dim:#a1a1aa;--line:#27272a;--line2:#3f3f46;--btn:#f4f4f5;--btn-ink:#18181b;--link:#93c5fd;--bg:#09090b;
+  background:#18181b;color:var(--ink);border:1px solid #27272a;border-radius:14px;padding:clamp(16px,2.4vw,24px);display:flex;flex-direction:column;gap:18px;color-scheme:dark}
+.panel .ph{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.panel .eyebrow{font:400 12px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:#d4d4d8}
+.panel .pname{font:700 16px var(--f-mono);margin-top:6px;color:#fafafa}
+.pchips{display:flex;gap:8px;flex-wrap:wrap;list-style:none;margin:0;padding:0}
+.pchips li{font:500 12px var(--f-mono);color:#e4e4e7;border:1px solid #3f3f46;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.pchips .seg{border-color:#3f3f46;border-radius:999px}
+.pchips .seg button{min-height:28px;padding:4px 10px;font-size:12px}
+.pgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+@media (max-width:760px){.pgrid{grid-template-columns:1fr}}
+.pleft{display:flex;flex-direction:column;gap:12px}
+.pleft p{color:#a1a1aa;font-size:14px}
+.rules{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;counter-reset:r}
+.rules li{display:grid;grid-template-columns:20px 1fr;gap:8px;font-size:13.5px;color:#d4d4d8;counter-increment:r}
+.rules li::before{content:counter(r);font:400 12px/1.9 var(--f-mono);color:#a1a1aa}
+.code-chip{font:700 18px var(--f-mono);letter-spacing:.12em;border:1px dashed #4ade80;color:#4ade80;border-radius:8px;padding:6px 12px}
+.cmd{font:13px/1.5 var(--f-mono);background:#09090b;border:1px solid #27272a;border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:nowrap;flex:1 1 220px;color:#e4e4e7}
+
+/* 统计卡 */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.stat .l{font-size:13px;font-weight:500;color:var(--muted)}
+.stat .v{font:700 20px/1.25 var(--f-mono);overflow-wrap:anywhere}
+.stat .s{font-size:12.5px;color:var(--dim)}
+
+/* 标签页 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;border-radius:0;background:none;color:var(--muted);padding:10px 14px;border-bottom:2px solid transparent;font-size:13.5px;min-height:44px;flex:none}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.main{display:flex;flex-direction:column;gap:18px}
+.sec{display:flex;flex-direction:column;gap:10px}
+.sec>h2{border-left:3px solid var(--ink);padding-left:10px;font-size:20px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.box ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.hidden-box{border:2px dashed var(--line2);border-radius:16px;padding:28px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--card)}
+.hidden-box .ic{width:44px;height:44px;border-radius:10px;background:var(--chip);display:grid;place-items:center;font-size:20px}
+pre{margin:0;font:13px/1.55 var(--f-mono);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;color:var(--ink)}
+code{font-family:var(--f-mono);font-size:.92em;background:var(--chip);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre code{background:none;padding:0}
+.aside{display:flex;flex-direction:column;gap:14px}
+.aside .box{gap:0;padding:16px 18px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;font-size:13.5px;margin-top:10px}
+.dl dt{color:var(--muted)}
+.dl dd{margin:0;text-align:right;font-weight:500}
+.checks{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+
+/* 提交 */
+.pn{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--card)}
+.pn h4{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:500;color:var(--muted);font-size:12.5px}
+td.v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pass{color:var(--green-ink);font-weight:700}
+.fail{color:var(--red);font-weight:700}
+.verdict{font-weight:600;border-radius:8px;padding:10px 12px;font-size:14px}
+.verdict.ok{background:var(--green-soft);color:var(--green-ink)}
+.verdict.no{background:var(--red-soft);color:var(--red)}
+.verdict.demo{background:var(--orange-soft);color:var(--orange-ink)}
+.reasons{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.reasons li{color:var(--red)}
+.reasons li.note{color:var(--muted)}
+.fb{font-size:14px;display:flex;flex-direction:column;gap:6px}
+.fb ul{margin:0;padding-left:1.2em}
+.err{color:var(--red);font-size:13.5px}
+.qa{display:flex;flex-direction:column;gap:16px}
+.qa .q{font-weight:500}
+.qa .q .from{font-size:12px;color:var(--dim);margin-left:6px}
+
+/* 作品集 */
+.pf{display:flex;flex-direction:column;gap:14px}
+.pf-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.pf-card .meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--muted)}
+.pf-card .excerpt{font-size:13.5px;border-left:3px solid var(--line2);padding-left:12px;color:var(--muted);white-space:pre-wrap}
+.empty{border:2px dashed var(--line2);border-radius:14px;padding:22px;color:var(--muted)}
+.foot{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="wrap" style="padding-top:0"><div class="notice" id="modeNote">你的进度只保存在这台设备的浏览器里。换设备或清理浏览器数据之前，请先导出备份。</div></div>
+<input id="importFile" type="file" accept=".json,application/json" hidden>
+<script>
+{
+"use strict";
+
+const REPO = "https://github.com/kulakeepor/llm-graduation-exam";
+const REPO_READY = false; // 任务包仓库发布后改成 true
+const colab = nb => "https://colab.research.google.com/github/kulakeepor/llm-graduation-exam/blob/main/notebooks/" + nb;
+const PROFILES = { t4: "Colab T4", mac: "我的 Mac" };
+const PROFILES_LONG = { t4: "Colab 免费 T4", mac: "自己的 Mac（Apple Silicon）" };
+
+/* ---------- 考核定义（沿用 v2） ---------- */
+function b(v) { return v === true ? "通过" : v === false ? "未通过" : String(v); }
+const budgetMetric = { k: "train_minutes", label: "训练耗时", needF: (s, p) => "≤ " + s.budget[p] + " 分钟（暂定）", okF: (v, s, p) => v <= s.budget[p], fmt: v => Math.round(v) + " 分钟", budget: true };
+const STAGES = [
+  { id: "s1", no: "一", key: "造", title: "从零手写 mini-GPT", world: "8", nb: "s1_mini_gpt.ipynb", diff: "进阶", judge: "1.1",
+    budget: { t4: 120, mac: 240 }, best: { k: "val_bpc", dir: -1 },
+    lede: "不用任何现成模型类，只用 PyTorch 张量，训练一个 500 万到 5000 万参数的中文模型。",
+    summary: "不用任何现成模型类，只用 PyTorch 张量写出分词器、Transformer 和训练循环，训练一个 500 万到 5000 万参数的中文模型。",
+    reqs: ["自己的 BPE 分词器、多头因果注意力、位置编码、LayerNorm、残差、训练循环", "支持 KV Cache 的生成函数", "训练日志记录验证集每字比特数（bpc）和训练耗时"],
+    metrics: [
+      { k: "params", label: "参数量", need: "500 万 – 5000 万", ok: v => v >= 5e6 && v <= 5e7, fmt: v => (v / 1e6).toFixed(1) + "M" },
+      { k: "shape_ok", bool: true, label: "形状测试", need: "通过", ok: v => v === true, fmt: b },
+      { k: "causal_max_diff", label: "因果性：改动未来的字后，当前输出的最大变化", need: "< 1e-5", ok: v => v < 1e-5, fmt: v => Number(v).toExponential(1) },
+      { k: "kv_cache_match", bool: true, label: "带 / 不带 KV Cache 生成一致", need: "一致", ok: v => v === true, fmt: b },
+      { k: "val_bpc", label: "验证集每字比特数（bpc）", need: "≤ 7.0（暂定）", ok: v => v <= 7.0, fmt: v => Number(v).toFixed(2) },
+      budgetMetric,
+    ],
+    text: { label: "交付说明", placeholder: "贴 3 段生成样例；描述训练 / 验证 loss 曲线的走势（何时开始过拟合、你怎么处理的）；模型配置（层数、头数、维度、上下文长度、词表大小）。",
+      rubric: "生成样例是否真实具体；对 loss 曲线的描述是否和数据吻合，能否指出过拟合迹象及应对；配置说明是否完整且前后一致。" },
+    sample: { params: 12400000, shape_ok: true, causal_max_diff: 0, kv_cache_match: true, val_bpc: 6.41, train_minutes: 95 } },
+  { id: "s2", no: "二", key: "调", title: "拆弹：修好下了毒的训练代码", world: "9", nb: null, diff: "进阶",
+    budget: { t4: 60, mac: 120 }, best: { k: "loss_ratio", dir: -1 },
+    lede: "一份能跑但结果是错的训练代码，藏了 5 个 Bug。只能靠诊断手段把它们找出来。",
+    summary: "拿到一份能跑但结果是错的训练代码，里面藏了 5 个 Bug。只能靠 loss 曲线、梯度范数、单 batch 过拟合测试等诊断手段把它们找出来。",
+    reqs: ["5 个 Bug 全部修复（裁判用隐藏测试逐个验证）", "修复后训练，验证 loss 回到参考水平", "每个 Bug 一份病历：症状 → 定位过程 → 根因 → 修复"],
+    metrics: [
+      { k: "bugs_fixed", label: "修好的 Bug", need: "5 / 5", ok: v => v >= 5, fmt: v => v + " / 5" },
+      { k: "loss_ratio", label: "修复后验证 loss ÷ 参考 loss", need: "≤ 1.05", ok: v => v <= 1.05, fmt: v => Number(v).toFixed(3) },
+      budgetMetric,
+    ],
+    text: { label: "5 份病历", placeholder: "Bug 1\n症状：……\n定位：我先看了……发现……\n根因：……\n修复：……\n\nBug 2 ……",
+      rubric: "每份病历是否包含症状、定位过程、根因、修复四部分；定位过程是否基于证据（曲线、数值、最小复现），而不是猜；根因解释是否准确。" },
+    sample: { bugs_fixed: 4, loss_ratio: 1.12, train_minutes: 40 } },
+  { id: "s3", no: "三", key: "练", title: "扩展定律与消融实验", world: "9", nb: null, diff: "困难",
+    budget: { t4: 240, mac: 480 }, best: { k: "pred_rel_err", dir: -1 },
+    lede: "先预测更大模型的 loss，再实际训练验证；另做至少 3 组消融。",
+    summary: "训练至少 4 个不同大小的模型，拟合计算量和 loss 的关系，先预测更大模型的 loss，再实际训练验证。另做至少 3 组消融实验。",
+    reqs: ["至少 4 个规模点 + 1 个用来验证预测的更大模型", "预测在训练之前写下，裁判比较预测值和实际值", "消融：至少去掉位置编码、LayerNorm、残差中的三项（或同等难度的部件）"],
+    metrics: [
+      { k: "n_models", label: "拟合用的模型个数", need: "≥ 4", ok: v => v >= 4, fmt: v => String(v) },
+      { k: "pred_rel_err", label: "预测 loss 的相对误差", need: "≤ 5%", ok: v => v <= 0.05, fmt: v => (v * 100).toFixed(1) + "%" },
+      { k: "n_ablations", label: "消融实验组数", need: "≥ 3", ok: v => v >= 3, fmt: v => String(v) },
+      budgetMetric,
+    ],
+    text: { label: "实验报告", placeholder: "实验设置、拟合出的关系式、预测过程、误差分析；每组消融的结果和你的解释。",
+      rubric: "实验设置是否可复现；拟合方法是否说清楚；是否先预测后验证；误差分析和消融结论是否有数据支撑、解释是否合理。" },
+    sample: { n_models: 5, pred_rel_err: 0.031, n_ablations: 3, train_minutes: 210 } },
+  { id: "s4", no: "四", key: "对齐", title: "把续写机变成助手", world: "11", nb: null, diff: "困难",
+    budget: { t4: 180, mac: 360 }, best: { k: "gain", dir: 1 },
+    lede: "约 0.5B 的开源模型，用 LoRA 做 SFT 和 DPO，证明它变好了、没变笨。",
+    summary: "拿一个约 0.5B 的开源模型，用 LoRA 做 SFT 和 DPO，变成一个专门的助手（比如唐诗助教），并证明它变好了、没变笨。T4 上用 PyTorch，Mac 上可以用 MLX。",
+    reqs: ["自己构造至少 300 条指令数据 + 一份偏好数据", "留出测试集，对比原模型、SFT、DPO 三个版本", "用一份通用题库检查有没有学了新的、忘了旧的"],
+    metrics: [
+      { k: "n_sft", label: "指令数据条数", need: "≥ 300", ok: v => v >= 300, fmt: v => String(v) },
+      { k: "gain", signed: true, label: "专项测试：DPO 版比原模型提高（分）", need: "≥ 15", ok: v => v >= 15, fmt: v => "+" + Number(v).toFixed(1) },
+      { k: "forget", signed: true, label: "通用题库：DPO 版比原模型下降（分）", need: "≤ 3", ok: v => v <= 3, fmt: v => Number(v).toFixed(1) },
+      budgetMetric,
+    ],
+    derive: m => { const n = v => typeof v === "number" && isFinite(v); const o = { ...m }; if (n(m.dpo_score) && n(m.base_score)) o.gain = m.dpo_score - m.base_score; if (n(m.base_general) && n(m.dpo_general)) o.forget = m.base_general - m.dpo_general; return o; },
+    text: { label: "评测报告", placeholder: "数据怎么构造的；三个版本在专项和通用题库上的得分表；3 组前后对比样例；你观察到的问题。",
+      rubric: "数据构造是否合理、有无泄漏到测试集；评测方法是否公平（同样的题、同样的采样设置）；对比样例是否能支撑结论；是否诚实地指出了模型的缺陷。" },
+    sample: { n_sft: 420, base_score: 41, sft_score: 63, dpo_score: 68, base_general: 52, dpo_general: 50, train_minutes: 150 } },
+  { id: "s5", no: "五", key: "交付", title: "量化、服务化、发布", world: "12", nb: null, diff: "进阶",
+    budget: { t4: 60, mac: 60 }, best: { k: "speedup", dir: 1 },
+    lede: "量化阶段四的模型，起一个本地 API，写好模型卡，让别人能一键复现。",
+    summary: "把阶段四的模型量化，起一个本地 API 服务，测清楚速度、内存和质量的取舍，写好模型卡，让别人能一键复现。",
+    reqs: ["4-bit 量化，测量量化前后的速度和内存", "API 服务能被程序调用", "仓库里有 README、模型卡、一键复现脚本"],
+    metrics: [
+      { k: "speedup", label: "量化后速度 ÷ 量化前", need: "≥ 1.5", ok: v => v >= 1.5, fmt: v => Number(v).toFixed(2) + "×" },
+      { k: "mem_ratio", label: "量化后内存 ÷ 量化前", need: "≤ 0.5", ok: v => v <= 0.5, fmt: v => Number(v).toFixed(2) },
+      { k: "quality_drop", label: "量化后专项得分下降（分）", need: "≤ 3", ok: v => v <= 3, fmt: v => Number(v).toFixed(1) },
+      { k: "api_ok", bool: true, label: "API 调用测试", need: "通过", ok: v => v === true, fmt: b },
+    ],
+    derive: m => { const n = v => typeof v === "number" && isFinite(v) && v > 0; const o = { ...m }; if (n(m.fp16_tps) && n(m.q4_tps)) o.speedup = m.q4_tps / m.fp16_tps; if (n(m.fp16_mem_gb) && n(m.q4_mem_gb)) o.mem_ratio = m.q4_mem_gb / m.fp16_mem_gb; return o; },
+    text: { label: "模型卡", placeholder: "模型能做什么、不能做什么；训练数据；评测结果；已知问题和风险；怎么复现。",
+      rubric: "是否清楚写明能力与局限；评测数字是否和前面阶段一致；已知问题是否诚实具体；复现步骤是否完整。" },
+    sample: { fp16_tps: 18.2, q4_tps: 41.5, fp16_mem_gb: 1.9, q4_mem_gb: 0.62, quality_drop: 1.8, api_ok: true } },
+];
+const DEFENSE = { id: "def", no: "辩", key: "答辩", title: "毕业答辩", diff: "进阶",
+  lede: "AI 考官从你前五个阶段交的材料里出 4 道题。每题 60 分以上、平均 70 分以上即通过。",
+  summary: "AI 考官从你前五个阶段交的材料里出 4 道题，你用自己的话作答。每题 60 分以上、平均 70 分以上即通过。" };
+const ALL = [...STAGES, DEFENSE];
+const byId = id => ALL.find(s => s.id === id);
+const repoOk = u => typeof u === "string" && /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(u.trim());
+const code = s => s.id === "def" ? "答辩" : s.id.toUpperCase();
+
+/* ---------- 本地存档（v3，兼容 v2） ---------- */
+const LS_KEY = "llm-grad-exam-v2"; // 键名不变，老用户的进度直接读到
+const HIST_MAX = 20;
+let storageOk = true;
+function blank() { return { kind: "llm-grad-backup", v: 3, profile: "t4", name: "", stages: {}, updatedAt: 0 }; }
+function migrate(x) {
+  if (!x || x.kind !== "llm-grad-backup") throw new Error("not a backup");
+  const out = { ...blank(), ...x, stages: { ...(x.stages || {}) } };
+  if (out.profile !== "t4" && out.profile !== "mac") out.profile = "t4";
+  if ((x.v || 2) < 3) {
+    const fallback = x.updatedAt ? new Date(x.updatedAt).toISOString() : new Date().toISOString();
+    for (const [id, s0] of Object.entries(out.stages)) {
+      if (!s0 || typeof s0 !== "object") { delete out.stages[id]; continue; }
+      const s = { ...s0 }, h = [];
+      if (s.auto && !s.auto.demo) h.push({ at: s.auto.at || fallback, type: "report", pass: !!s.auto.pass, reasons: (s.auto.rows || []).filter(r => !r.ok).map(r => r.label + "：" + r.shown), val: null, migrated: true });
+      if (s.ai) h.push({ at: s.passedAt ? s.passedAt + "T00:00:00.000Z" : fallback, type: "text", pass: !!s.ai.pass, score: s.ai.score, migrated: true });
+      if (s.defense) h.push({ at: s.passedAt ? s.passedAt + "T00:00:00.000Z" : fallback, type: "defense", pass: !!s.defense.pass, score: s.defense.avg, migrated: true });
+      s.history = h.sort((a, b2) => String(b2.at).localeCompare(String(a.at)));
+      out.stages[id] = s;
+    }
+  }
+  for (const [id, s] of Object.entries(out.stages)) {
+    if (!byId(id) || !s || typeof s !== "object") { delete out.stages[id]; continue; }
+    if (!Array.isArray(s.history)) s.history = [];
+    // 不信任存档里的 passed：按三样证据重算
+    s.passed = id === "def" ? !!s.defense?.pass : !!(s.auto?.pass && s.ai?.pass && repoOk(s.repo));
+    if (s.passed && !s.passedAt) s.passedAt = new Date().toISOString().slice(0, 10);
+    if (!s.passed) delete s.passedAt;
+  }
+  out.v = 3;
+  return out;
+}
+let S = blank();
+try { const raw = localStorage.getItem(LS_KEY); if (raw) S = migrate(JSON.parse(raw)); } catch (e) { if (!(e instanceof SyntaxError) && e.message !== "not a backup") storageOk = false; }
+let ownerDb = null;
+function persist() {
+  S.updatedAt = Date.now();
+  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch { storageOk = false; }
+  if (ownerDb) ownerDb.doc("exam/state").set(JSON.parse(JSON.stringify(S))).catch(() => {});
+}
+const st = id => (S.stages[id] ||= { history: [] });
+function addHist(id, entry) {
+  const x = st(id);
+  x.history = [{ at: new Date().toISOString(), ...entry }, ...(x.history || [])].slice(0, HIST_MAX);
+}
+
+/* ---------- 工具 ---------- */
+const $ = (s, root = document) => root.querySelector(s);
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return e;
+}
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function newCode() {
+  const A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", r = new Uint8Array(8);
+  crypto.getRandomValues(r); return Array.from(r, x => A[x % A.length]).join("");
+}
+function copyText(text, btn) {
+  const t = btn.textContent;
+  const done = msg => { btn.textContent = msg; setTimeout(() => btn.textContent = t, 1400); };
+  try { navigator.clipboard.writeText(text).then(() => done("已复制"), () => done("请手动选择复制")); } catch { done("请手动选择复制"); }
+}
+const fmtTime = iso => { const d = new Date(iso); if (isNaN(d)) return String(iso || ""); const p = n => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()); };
+
+/* ---------- 解锁与状态 ---------- */
+const passed = id => S.stages[id]?.passed === true;
+function prevOf(s) { const i = ALL.findIndex(x => x.id === s.id); return i > 0 ? ALL[i - 1] : null; }
+function isOpen(s) { const p = prevOf(s); return !p || passed(p.id); }
+function evidence(id) {
+  const x = S.stages[id] || {};
+  if (id === "def") return [{ label: "答辩", ok: !!x.defense?.pass }];
+  return [{ label: "成绩单", ok: !!x.auto?.pass }, { label: "公开仓库", ok: repoOk(x.repo) }, { label: "书面材料", ok: !!x.ai?.pass }];
+}
+function status(s) {
+  if (passed(s.id)) return ["passed", "已通关"];
+  if (!isOpen(s)) return ["locked", "未解锁"];
+  const x = S.stages[s.id] || {};
+  return (evidence(s.id).some(e => e.ok) || (x.history || []).length) ? ["half", "进行中"] : ["open", "可挑战"];
+}
+const unlockText = s => { const p = prevOf(s); return p ? "通过阶段" + p.no + "「" + p.key + "」后解锁" : ""; };
+
+/* ---------- 判定：不信任 pass 字段，用原始数值重判，每个失败项给出原因 ---------- */
+function judge(stage, raw, demo) {
+  let rep;
+  try { rep = typeof raw === "string" ? JSON.parse(raw) : raw; } catch (e) { return { error: "成绩单不是合法的 JSON：" + e.message }; }
+  if (!rep || rep.kind !== "llm-grad-report") return { error: "这不是毕业考核的成绩单（缺少 kind: \"llm-grad-report\"）。请用 grad_judge.py 生成。" };
+  if (rep.stage !== stage.id) return { error: "这是 " + String(rep.stage) + " 的成绩单，不是本阶段（" + stage.id + "）的。" };
+  const isDemo = demo || rep.challenge === "DEMO";
+  const p = S.profile;
+  let m = rep.metrics || {};
+  if (stage.derive) m = stage.derive(m);
+  const rows = stage.metrics.map(x => {
+    const v = m[x.k], has = v !== undefined && v !== null && v !== "";
+    const valid = has && (x.bool ? typeof v === "boolean" : typeof v === "number" && isFinite(v) && (x.signed || v >= 0));
+    const ok = valid && !!(x.okF ? x.okF(v, stage, p) : x.ok(v));
+    const need = x.needF ? x.needF(stage, p) : x.need, shown = !has ? "缺失" : valid ? x.fmt(v) : "无效：" + JSON.stringify(v).slice(0, 20);
+    let why = null;
+    if (!ok) why = !has ? "缺少指标：成绩单里没有「" + x.label + "」（" + x.k + "）。" :
+      !valid ? "数值无效：「" + x.label + "」应为" + (x.bool ? " true / false" : x.signed ? "数字" : "非负数字") + "，成绩单里是 " + JSON.stringify(v).slice(0, 40) + "。" :
+      x.budget ? "超出算力预算：训练耗时 " + shown + "，" + PROFILES_LONG[p] + " 的预算是 " + stage.budget[p] + " 分钟。" :
+      "指标未达标：「" + x.label + "」是 " + shown + "，要求 " + need + "。";
+    return { label: x.label, need, shown, ok, why, k: x.k, raw: valid ? v : null };
+  });
+  if (!isDemo) {
+    const want = S.stages[stage.id]?.challenge, got = rep.challenge ? String(rep.challenge) : "";
+    rows.unshift({ label: "挑战码", need: want || "先领取", shown: got || "缺失", ok: !!want && got === want,
+      why: !want ? "还没领取挑战码：先在上方领码，再用它运行裁判。" : !got ? "成绩单里没有挑战码：运行裁判时加上 --challenge " + want + "。" : got !== want ? "挑战码不符：成绩单里是 " + got + "，你当前领取的是 " + want + "。用当前挑战码重跑裁判。" : null });
+    const dev = String(rep.device || "");
+    const devOk = p === "t4" ? /T4/i.test(dev) : /mps/i.test(dev);
+    rows.unshift({ label: "运行设备", need: p === "t4" ? "Tesla T4" : "Apple Silicon（MPS）", shown: dev || "缺失", ok: devOk,
+      why: devOk ? null : "设备不符：你选的算力是「" + PROFILES_LONG[p] + "」，成绩单里的设备是「" + (dev || "缺失") + "」。在所选算力上重跑裁判，或切换算力。" });
+  }
+  const notes = Array.isArray(rep.notes) ? rep.notes.slice(0, 8).map(String) : [];
+  const bestRow = stage.best ? rows.find(r => r.k === stage.best.k) : null;
+  return { rows, pass: rows.every(r => r.ok), demo: isDemo, codeHash: rep.code_hash ? String(rep.code_hash) : "", device: rep.device ? String(rep.device) : "",
+    notes, val: bestRow && bestRow.raw != null && typeof bestRow.raw === "number" ? bestRow.raw : null, at: new Date().toISOString() };
+}
+
+/* ---------- AI ---------- */
+let sample = null, downloads = null, sampleDenied = false, capsReady = false;
+async function aiGrade(stage, text) {
+  const r = await sample.json(
+`你是大模型工程师毕业考核的考官，学员正在完成"${stage.key}：${stage.title}"阶段。
+阶段要求：${stage.summary}
+评分标准：${stage.text.rubric}
+请严格但公正地批改学员提交的"${stage.text.label}"。内容空泛、只有结论没有证据、或明显是套话的，不能及格。
+只回复一个 JSON 对象：{"score": 0到100的整数, "strengths": ["做得好的点，最多3条"], "gaps": ["必须补的缺口，最多4条，每条说清楚缺什么"], "feedback": "一两句总评"}
+70 分及以上为通过。
+
+学员提交：
+"""
+${text.slice(0, 12000)}
+"""`, { modelTier: "default" });
+  const score = Math.max(0, Math.min(100, Math.round(Number(r?.score) || 0)));
+  const arr = x => Array.isArray(x) ? x.slice(0, 5).map(String) : [];
+  return { score, pass: score >= 70, strengths: arr(r?.strengths), gaps: arr(r?.gaps), feedback: String(r?.feedback || "") };
+}
+function aiErr(err) {
+  if (err?.code === "not_granted") { sampleDenied = true; return "你没有允许本页调用 Claude，AI 批改和答辩已隐藏。"; }
+  return err?.code === "rate_limited" ? "请求太频繁，或者你的 Claude 额度到了，过一会儿再试。" : "没有完成（" + (err?.code || "错误") + "），可以再试一次。";
+}
+function aiUnavailable() {
+  if (sampleDenied) return "你没有允许本页调用 Claude，所以 AI 批改和答辩不可用。想用的话，重新打开本页，在提示时选择允许。";
+  if (!capsReady) return "正在连接 Claude…";
+  if (!sample) return "这个视图里不能调用 Claude，AI 批改和答辩不可用。登录 Claude 账号后打开本页即可使用（批改用的是你自己的额度）。";
+  return null;
+}
+
+function recompute(id) {
+  const x = st(id);
+  const ok = id === "def" ? !!x.defense?.pass : !!(x.auto?.pass && x.ai?.pass && repoOk(x.repo));
+  x.passed = ok;
+  if (ok && !x.passedAt) x.passedAt = new Date().toISOString().slice(0, 10);
+  if (!ok) delete x.passedAt;
+}
+
+/* ---------- 路由：#s1…#s5、#def、#portfolio，其余为总览 ---------- */
+const local = {}, tabOf = {}, drafts = {};
+function route() { const h = location.hash.slice(1); return byId(h) ? h : h === "portfolio" ? "portfolio" : "home"; }
+function go(tab, id) { tabOf[id] = tab; render(); const t = $("#tabs"); if (t) t.scrollIntoView({ block: "start" }); }
+
+/* ---------- 公共小件 ---------- */
+function tag(cls, text) { return el("span", { class: "tag " + cls, text }); }
+function profileSeg() {
+  return el("div", { class: "seg", role: "group", "aria-label": "选择算力" }, ["t4", "mac"].map(p =>
+    el("button", { type: "button", "aria-pressed": String(S.profile === p), text: PROFILES[p], onclick: () => { S.profile = p; persist(); render(); } })));
+}
+function seal(date, big) { return el("div", { class: "seal" + (big ? " big" : ""), "aria-label": "已通关" }, "通关", el("small", { text: date || "" })); }
+
+/* ---------- 总览页 ---------- */
+function viewHome() {
+  const n = ALL.filter(s => passed(s.id)).length;
+  const head = el("header", { class: "hero" },
+    el("div", {}, el("div", { class: "tags" }, tag("passed", "开放挑战"), tag("", "毕业考核"), tag("half", "入门级工程师")),
+      el("h1", { style: "margin-top:16px", text: "挑战大模型工程师" }),
+      el("p", { class: "lede", text: "五个阶段加一场答辩。用 Colab 免费 T4 或你自己的 Mac 完成，每个阶段交三样证据：带挑战码的成绩单、可复现的公开仓库、书面材料。三样都过才盖章，通关记录自动进入你的作品集。" })),
+    el("div", { class: "score", "aria-label": "毕业进度" }, el("div", { class: "big" }, String(n), el("small", { text: " / " + ALL.length })),
+      el("div", { class: "bar" }, ALL.map(s => el("i", { class: passed(s.id) ? "on" : "", title: s.key }))),
+      el("div", { class: "small", text: "算力：" + PROFILES_LONG[S.profile] })));
+  const tools = el("div", { class: "toolbar" },
+    el("div", { class: "row" }, el("span", { class: "small", text: "我的算力" }), profileSeg()),
+    el("div", { class: "row" }, el("button", { type: "button", text: "导出备份", onclick: e => saveFile("llm-grad-backup.json", JSON.stringify(S, null, 2), e.currentTarget) }),
+      el("button", { type: "button", text: "导入备份", onclick: () => $("#importFile").click() })));
+  const cards = el("div", { class: "cards" }, ALL.map(s => {
+    const [cls, label] = status(s), ev = evidence(s.id), x = S.stages[s.id] || {};
+    return el("a", { class: "lvl " + cls, href: "#" + s.id, "aria-label": code(s) + " " + s.title + "，" + label },
+      el("div", { class: "top" }, el("span", { class: "code", text: code(s) + " · " + s.key }), tag(cls, label)),
+      el("h3", { text: s.title }),
+      el("p", { class: "small", text: cls === "locked" ? unlockText(s) + "，可以先试玩" : s.lede }),
+      el("div", { class: "meta" }, el("span", { text: "难度 " + s.diff }),
+        s.budget ? el("span", { class: "mono", text: PROFILES[S.profile] + " " + s.budget[S.profile] + " 分钟" }) : el("span", { text: "4 题 · 均分 ≥ 70" }),
+        s.id !== "def" ? el("span", { class: "ev", title: "证据 " + ev.filter(e => e.ok).length + " / 3" }, ev.map(e => el("i", { class: e.ok ? "on" : "" }))) : null),
+      passed(s.id) ? seal(x.passedAt) : null);
+  }));
+  const pfN = ALL.filter(s => passed(s.id)).length;
+  const pf = el("div", { class: "pf-entry" },
+    el("div", {}, el("h3", { text: "我的作品集 · " + pfN + " 张卡片" }), el("p", { class: "small", text: "每通过一关自动加一张：成绩、仓库、代码指纹、考官评语。署名后可以导出成独立网页，发给别人或放进简历。" })),
+    el("a", { class: "btn", href: "#portfolio", text: "打开作品集 →" }));
+  return [head, tools, el("section", { class: "sec", "aria-label": "关卡" }, el("h2", { text: "关卡" }), cards), pf, footer()];
+}
+function footer() {
+  return el("footer", { class: "foot" },
+    el("p", {}, "任务包、Colab 模板和本地裁判 ", el("code", { text: "grad_judge.py" }), " 会放在公开仓库 ", el("a", { href: REPO, target: "_blank", rel: "noopener", text: "kulakeepor/llm-graduation-exam" }), REPO_READY ? "。" : "（准备中，链接可能暂时打不开）。"),
+    el("p", { text: "防造假的边界：训练发生在你自己的设备上，没有任何网页能彻底防止伪造。这份考核的可信度来自公开、可复现的证据：挑战码、代码指纹、公开仓库和答辩，别人随时可以克隆你的仓库重跑一遍。网页不信任成绩单里的任何\"通过\"字段，会用原始数值重新判定。" }),
+    el("p", { text: "标\"暂定\"的阈值和算力预算，会在参考解法分别于 Colab T4 和 Apple Silicon Mac 上实测后校准。" }));
+}
+
+/* ---------- 阶段详情页 ---------- */
+function viewStage(s) {
+  const open = isOpen(s), [cls, label] = status(s), x = S.stages[s.id] || {};
+  const isDef = s.id === "def";
+  const tab = tabOf[s.id] || "overview";
+  const out = [el("a", { class: "back", href: "#", text: "← 返回总览" })];
+  out.push(el("div", { class: "tags" }, tag(cls, label), tag("", "能力 · " + s.key), tag(s.diff === "困难" ? "half" : "", "难度 · " + s.diff)));
+  out.push(el("div", { class: "title-row" }, el("div", {},
+    el("h1", { text: s.title }),
+    el("p", { class: "lede", text: s.lede + (s.budget ? " · 算力预算 T4 " + s.budget.t4 + " 分钟 / Mac " + s.budget.mac + " 分钟" : "") })),
+    passed(s.id) ? seal(x.passedAt, true) : null));
+  out.push(examPanel(s, open, x));
+  out.push(statsRow(s, x));
+  const tabs = isDef ? [["overview", "概览"], ["submit", "答辩"]] : [["overview", "概览"], ["pack", "任务包"], ["submit", "提交"]];
+  out.push(el("div", { class: "tabs", role: "tablist", id: "tabs" }, tabs.map(([k, t]) =>
+    el("button", { type: "button", role: "tab", "aria-selected": String(tab === k), text: t, onclick: () => go(k, s.id) }))));
+  const main = el("div", { class: "main", role: "tabpanel" });
+  if (tab === "pack" && !isDef) main.append(...tabPack(s, x));
+  else if (tab === "submit") main.append(...(isDef ? [defensePanel(open)] : tabSubmit(s, open, x)), historyBox(x));
+  else main.append(...tabOverview(s, open));
+  out.push(el("div", { class: "layout" }, main, aside(s, open, x)));
+  return out;
+}
+
+function examPanel(s, open, x) {
+  const isDef = s.id === "def";
+  const chips = el("ul", { class: "pchips" });
+  if (s.budget) chips.append(el("li", { text: "⏱ " + PROFILES[S.profile] + " " + s.budget[S.profile] + " 分钟" }));
+  chips.append(el("li", { text: isDef ? "4 道题" : "3 样证据" }));
+  if (!isDef) chips.append(el("li", { style: "padding:0;border:0" }, profileSeg()));
+  const left = el("div", { class: "pleft" });
+  if (isDef) {
+    left.append(el("h3", { text: open ? "用自己的话，讲清每一步为什么" : unlockText(s) }),
+      el("p", { text: "考官会追问你前五个阶段里的具体做法和数字，再考几道核心原理。不限时，可以换一组题重考。" }),
+      el("div", { class: "row" }, el("button", { class: "primary", type: "button", text: open ? "进入答辩" : "看看答辩怎么考", onclick: () => go(open ? "submit" : "overview", s.id) })));
+  } else if (!open) {
+    left.append(el("h3", { text: unlockText(s) }),
+      el("p", { text: "解锁之前可以先用示例成绩单试玩判定，熟悉流程。试玩结果不记录，也不计入提交历史。" }),
+      el("div", { class: "row" }, el("button", { class: "primary", type: "button", text: "用示例成绩单试玩", onclick: () => { drafts["rep-" + s.id] = demoReport(s); go("submit", s.id); } })));
+  } else {
+    const cmd = "python3 grad_judge.py " + s.id + " --challenge " + (x.challenge || "<挑战码>");
+    left.append(el("h3", { text: "领码之后再跑裁判" }),
+      el("p", { text: "不限时，可以中断。挑战码会写进成绩单，证明这份成绩是领码之后跑出来的；裁判的测试输入也由挑战码决定，没法提前准备。" }),
+      el("div", { class: "row" },
+        el("button", { class: "primary", type: "button", text: x.challenge ? "换一个挑战码" : "领取挑战码", onclick: () => { st(s.id).challenge = newCode(); persist(); render(); } }),
+        x.challenge ? el("span", { class: "code-chip", id: "challenge-" + s.id, text: x.challenge }) : null),
+      el("div", { class: "row" }, el("div", { class: "cmd", text: cmd }), el("button", { type: "button", text: "复制命令", onclick: e => copyText(cmd, e.currentTarget) })));
+  }
+  const rules = isDef ? [
+    "前五个阶段全部通关后开放。",
+    "AI 考官从你交的材料里出 4 道题，至少 2 道追问你自己的做法或数字。",
+    "每题 60 分以上、平均 70 分以上通过。",
+    "用自己的话作答；背诵式的空话不超过 50 分。",
+    "可以换一组题重考，每次交卷都记入提交历史。",
+    "出题和评分用的是你自己的 Claude 额度，需要登录 Claude。",
+  ] : [
+    "每次正式提交前领一个新挑战码，用它运行本地裁判。",
+    "运行设备要和所选算力一致：选 T4，成绩单的设备里要有 T4；选 Mac，要有 mps。",
+    s.metrics.some(m => m.budget) ? "训练总耗时不超过当前算力的预算（暂定）。" : "本阶段不限训练耗时，按速度、内存和质量的取舍判定。",
+    "成绩单、公开仓库、书面材料三样都过，才盖章通关。",
+    "可以重交，以最新一次为准；每次正式判定都记入提交历史。",
+    "阶段未解锁时可以用示例成绩单试玩，结果不记录。",
+    "诚信：证据全部公开，任何人都可以克隆你的仓库重跑。网页不信任成绩单里的\"通过\"字段。",
+  ];
+  return el("section", { class: "panel", "aria-label": "考核面板" },
+    el("div", { class: "ph" }, el("div", {}, el("div", { class: "eyebrow", text: isDef ? "毕业考核 · 最后一关" : "毕业考核 · 阶段" + s.no }), el("div", { class: "pname", text: s.key + "：" + s.title })), chips),
+    el("div", { class: "pgrid" }, left, el("div", {}, el("div", { class: "eyebrow", style: "margin-bottom:10px", text: "规则" }), el("ol", { class: "rules" }, rules.map(t => el("li", { text: t }))))));
+}
+
+function statsRow(s, x) {
+  const h = x.history || [], ev = evidence(s.id), [, label] = status(s);
+  let bestV = "—", bestS = "";
+  if (s.id === "def") {
+    const sc = h.filter(e => e.type === "defense" && e.score != null).map(e => e.score);
+    bestV = sc.length ? Math.max(...sc) + " 分" : "—"; bestS = "答辩最高均分";
+  } else {
+    const met = s.metrics.find(m => m.k === s.best.k);
+    const vals = h.filter(e => e.type === "report" && typeof e.val === "number").map(e => e.val);
+    if (vals.length) bestV = met.fmt(s.best.dir < 0 ? Math.min(...vals) : Math.max(...vals));
+    const ai = h.filter(e => e.type === "text" && e.score != null).map(e => e.score);
+    bestS = "最佳" + met.label.replace(/（.*?）/g, "") + (ai.length ? " · 考官最高 " + Math.max(...ai) + " 分" : "");
+  }
+  const stat = (icon, l, v, sub) => el("div", { class: "stat" }, el("span", { class: "l", text: icon + " " + l }), el("span", { class: "v", text: v }), sub ? el("span", { class: "s", text: sub }) : null);
+  return el("div", { class: "stats" },
+    stat("◎", "我的状态", label, s.id === "def" ? (x.questions ? "已出题" : "") : "证据 " + ev.filter(e => e.ok).length + " / 3"),
+    stat("↑", "已提交次数", String(h.length), h.length ? "通过 " + h.filter(e => e.pass).length + " 次" : "正式判定才计入"),
+    stat("★", "最佳成绩", bestV, bestS),
+    stat("◆", "通关后获得", passed(s.id) ? "已获得" : "作品集卡片", passed(s.id) ? (x.passedAt || "") : "外加一枚红色印章"));
+}
+
+function demoReport(s) { return JSON.stringify({ kind: "llm-grad-report", stage: s.id, challenge: "DEMO", device: "示例", metrics: s.sample }, null, 2); }
+
+function tabOverview(s, open) {
+  const out = [];
+  if (!open) out.push(el("div", { class: "hidden-box" }, el("div", { class: "ic", "aria-hidden": "true", text: "🔒" }), el("h3", { text: "还没解锁" }),
+    el("p", { class: "small", text: unlockText(s) + "。下面的要求可以先看，解锁前的判定只算试玩。" }),
+    s.id !== "def" ? el("button", { type: "button", text: "用示例成绩单试玩", onclick: () => { drafts["rep-" + s.id] = demoReport(s); go("submit", s.id); } }) : null));
+  if (s.id === "def") {
+    out.push(el("section", { class: "sec" }, el("h2", { text: "怎么考" }), el("div", { class: "box" }, el("p", { text: s.summary }),
+      el("p", { class: "small", text: "原理题大致是这类问题：" }),
+      el("ul", {}, ["注意力里为什么要除以 √d？去掉会怎样？", "训练到第 3000 步 loss 突然变 NaN，你按什么顺序排查？", "LoRA 为什么能用很少的参数做微调？rank 选大选小各有什么代价？", "你的模型在哪类问题上最差？为什么？下一步打算怎么改？"].map(t => el("li", { text: t }))),
+      el("p", { class: "small", text: "评分看三点：原理对不对、是不是用自己的话讲清楚、有没有结合具体例子或数据。答不上的题记下来，补完再考。" }))));
+    return out;
+  }
+  out.push(el("section", { class: "sec" }, el("h2", { text: "任务说明" }), el("div", { class: "box" }, el("p", { text: s.summary }), el("strong", { text: "要求" }), el("ul", {}, s.reqs.map(t => el("li", { text: t }))))));
+  const rows = [
+    ["运行设备", S.profile === "t4" ? "Tesla T4" : "Apple Silicon（MPS）"],
+    ["挑战码", "与当前领取的一致"],
+    ...s.metrics.map(m => [m.label, m.needF ? m.needF(s, S.profile) : m.need]),
+  ];
+  out.push(el("section", { class: "sec" }, el("h2", { text: "硬指标" }), el("div", { class: "box" },
+    el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", { text: "检查项" }), el("th", { text: "要求（" + PROFILES[S.profile] + "）" }))),
+      el("tbody", {}, rows.map(([a, c]) => el("tr", {}, el("td", { text: a }), el("td", { class: "v", text: c })))))),
+    el("p", { class: "small", text: "标\"暂定\"的阈值会在参考解法实测后校准。网页用成绩单里的原始数值重新判定。" }))));
+  out.push(el("section", { class: "sec" }, el("h2", { text: "书面材料：" + s.text.label }), el("div", { class: "box" },
+    el("p", { text: s.text.placeholder }), el("p", { class: "small", text: "评分标准：" + s.text.rubric + " 70 分及以上通过。" }))));
+  return out;
+}
+
+function tabPack(s, x) {
+  const out = [];
+  const ch = x.challenge || "<挑战码>";
+  if (!s.nb) {
+    out.push(el("section", { class: "sec" }, el("h2", { text: "任务包" }), el("div", { class: "box" },
+      el("p", { text: "这一阶段的模板和裁判，会在课程推进到这里时发布。目前开放的是阶段一。" }),
+      el("p", { class: "small", text: "在那之前，可以先读概览里的要求，并用示例成绩单试玩判定。" }))));
+    return out;
+  }
+  out.push(el("section", { class: "sec" }, el("h2", { text: "开始" }), el("div", { class: "box" },
+    el("p", {}, el("strong", { text: "Colab T4：" }), " ", el("a", { href: colab(s.nb), target: "_blank", rel: "noopener", text: "在 Colab 中打开模板" }), "，运行时类型选 T4 GPU。"),
+    el("p", {}, el("strong", { text: "自己的 Mac：" }), " 克隆 ", el("a", { href: REPO, target: "_blank", rel: "noopener", text: "任务包仓库" }), "，在本地用 PyTorch 的 MPS 加速训练。"),
+    REPO_READY ? null : el("p", { class: "small", text: "任务包仓库正在准备，上面两个链接可能暂时打不开。" }))));
+  out.push(el("section", { class: "sec" }, el("h2", { text: "本地裁判 grad_judge.py v" + s.judge }), el("div", { class: "box" },
+    el("p", { text: "把 grad_judge.py 和你的 my_gpt.py、train_log.json 放在同一个文件夹里，运行：" }),
+    el("pre", {}, el("code", { text: "python3 grad_judge.py " + s.id + " --challenge " + ch })),
+    el("p", { class: "small", text: "裁判会生成 report_" + s.id + ".json，到「提交」页粘贴或上传。成绩单里有运行设备、挑战码、代码指纹（my_gpt.py 和 train_log.json 的 SHA-256 前 16 位）和各项原始数值。" }))));
+  out.push(el("section", { class: "sec" }, el("h2", { text: "my_gpt.py 接口约定" }), el("div", { class: "box" },
+    el("pre", {}, el("code", { text:
+"def load():\n    \"\"\"返回 (model, meta)\"\"\"\n    # model: torch.nn.Module\n    #   model(idx)            -> logits，形状 [B, T, vocab_size]\n    #   model.generate(idx, max_new_tokens, use_cache)\n    #                         -> 贪心生成，返回 [B, T + max_new_tokens]\n    # meta: {\"vocab_size\": int, \"block_size\": int}\n    return model, meta" })),
+    el("p", { text: "训练时写出 train_log.json：" }),
+    el("pre", {}, el("code", { text: "{\"val_bpc\": 最新一次验证集每字比特数, \"train_minutes\": 训练总分钟数}" })),
+    el("p", { class: "small", text: "裁判会检查：参数量、形状、因果性（改动未来的字，当前位置的输出不能变）、带和不带 KV Cache 的生成是否一致，再读取 train_log.json 里的 bpc 和耗时。" }))));
+  out.push(el("section", { class: "sec" }, el("h2", { text: "你的仓库里要有" }), el("div", { class: "box" }, el("ul", {},
+    ["my_gpt.py 和训练代码（不用任何现成模型类）", "train_log.json 和训练 / 验证 loss 曲线", "README：环境、数据来源、一键复现命令", "report_" + s.id + ".json（可选，方便别人对照代码指纹）"].map(t => el("li", { text: t }))))));
+  return out;
+}
+
+function tabSubmit(s, open, x) {
+  const L = local[s.id] || {};
+  const out = [];
+  if (!open) out.push(el("div", { class: "notice warn", text: unlockText(s) + "。现在的判定和批改都是试玩，结果不记录。" }));
+  // ① 挑战码
+  if (open) out.push(el("div", { class: "pn" }, el("h4", {}, el("span", { text: "① 挑战码" }), el("span", { class: x.challenge ? "pass" : "fail", text: x.challenge ? "已领取" : "未领取" })),
+    x.challenge ? el("p", { class: "small" }, "当前挑战码 ", el("code", { text: x.challenge }), "。成绩单里的挑战码必须和它一致。") : el("p", { class: "small", text: "在上方考核面板领取。" })));
+  // ② 成绩单
+  const ta = el("textarea", { class: "code", id: "rep-" + s.id, placeholder: "粘贴 report_" + s.id + ".json 的内容，或选择文件", "aria-label": "成绩单 JSON" });
+  const file = el("input", { type: "file", accept: ".json,application/json", "aria-label": "选择成绩单文件" });
+  file.addEventListener("change", async () => { const f = file.files?.[0]; if (f) { ta.value = await f.text(); drafts[ta.id] = ta.value; } });
+  const show = L.autoView || x.auto;
+  out.push(el("div", { class: "pn" }, el("h4", {}, el("span", { text: "② 成绩单（自动判定）" }), x.auto ? el("span", { class: x.auto.pass ? "pass" : "fail", text: x.auto.pass ? "达标" : "未达标" }) : null),
+    ta, el("div", { class: "row" }, file),
+    el("div", { class: "row" },
+      el("button", { class: "primary", type: "button", id: "judge-" + s.id, text: open ? "判定" : "试玩判定", onclick: () => {
+        const demo = !open || /"challenge"\s*:\s*"DEMO"/.test(ta.value);
+        const res = judge(s, ta.value, demo);
+        if (res.error || res.demo) { local[s.id] = { ...L, autoView: res }; render(); return; }
+        local[s.id] = { ...L, autoView: null }; st(s.id).auto = res;
+        addHist(s.id, { type: "report", pass: res.pass, reasons: res.rows.filter(r => !r.ok).map(r => r.why), val: res.val, challenge: S.stages[s.id].challenge || "" });
+        recompute(s.id); persist(); render();
+      } }),
+      el("button", { type: "button", text: "填入示例成绩单", onclick: () => { ta.value = demoReport(s); drafts[ta.id] = ta.value; } })),
+    show ? resultBlock(show) : null));
+  // ③ 仓库
+  const repoIn = el("input", { type: "url", id: "repo-" + s.id, placeholder: "https://github.com/你的用户名/仓库名", value: x.repo || "", disabled: !open, "aria-label": "公开仓库地址" });
+  out.push(el("div", { class: "pn" }, el("h4", {}, el("span", { text: "③ 公开仓库（可复现）" }), x.repo ? el("span", { class: repoOk(x.repo) ? "pass" : "fail", text: repoOk(x.repo) ? "已填写" : "格式不对" }) : null),
+    el("p", { class: "small", text: "仓库里要有这一阶段的代码、训练日志和一键复现说明。网页无法读取 GitHub，只记录链接；成绩单里的代码指纹" + (x.auto?.codeHash ? "（" + x.auto.codeHash + "）" : "") + "会一起写进作品集，方便别人核对。" }),
+    repoIn, el("div", { class: "row" }, el("button", { type: "button", disabled: !open, text: "保存仓库地址", onclick: () => {
+      const v = repoIn.value.trim();
+      if (!repoOk(v)) { local[s.id] = { ...L, repoErr: "地址格式应为 https://github.com/用户名/仓库名" }; render(); return; }
+      local[s.id] = { ...L, repoErr: null }; st(s.id).repo = v; delete drafts[repoIn.id]; recompute(s.id); persist(); render();
+    } })), L.repoErr ? el("p", { class: "err", text: L.repoErr }) : null));
+  // ④ 书面材料
+  const tx = el("textarea", { id: "txt-" + s.id, placeholder: s.text.placeholder, "aria-label": s.text.label });
+  if (x.aiText) tx.value = x.aiText;
+  const ai = L.aiView || x.ai, why = aiUnavailable();
+  out.push(el("div", { class: "pn" }, el("h4", {}, el("span", { text: "④ " + s.text.label + "（AI 考官批改）" }), x.ai ? el("span", { class: x.ai.pass ? "pass" : "fail", text: x.ai.score + " 分" }) : null),
+    why && sampleDenied ? null : tx,
+    why ? el("p", { class: "small", text: why }) : el("div", { class: "row" },
+      el("button", { class: "primary", type: "button", text: L.busy ? "批改中…" : open ? "提交批改" : "试玩批改", disabled: !!L.busy, onclick: async () => {
+        const text = tx.value.trim();
+        if (text.length < 80) { local[s.id] = { ...L, aiErr: "内容太短了，至少写 80 个字再交。" }; render(); return; }
+        local[s.id] = { ...L, busy: true, aiErr: null }; render();
+        try {
+          const r = await aiGrade(s, text);
+          if (!open) { local[s.id] = { ...local[s.id], busy: false, aiView: r }; render(); return; }
+          local[s.id] = { ...local[s.id], busy: false, aiView: null };
+          Object.assign(st(s.id), { ai: r, aiText: text.slice(0, 20000) });
+          addHist(s.id, { type: "text", pass: r.pass, score: r.score });
+          recompute(s.id); persist(); render();
+        } catch (err) { local[s.id] = { ...local[s.id], busy: false, aiErr: aiErr(err) }; render(); }
+      } }), el("span", { class: "small", text: "批改用的是你自己的 Claude 额度。" })),
+    L.aiErr ? el("p", { class: "err", text: L.aiErr }) : ai ? feedbackBlock(ai) : null,
+    L.aiView && !open ? el("p", { class: "small", text: "阶段未解锁，本次批改不记录。" }) : null));
+  return out;
+}
+
+function resultBlock(res) {
+  if (res.error) return el("p", { class: "err", text: "❌ " + res.error });
+  const tb = el("tbody", {}, res.rows.map(r => el("tr", {}, el("td", { text: r.label }), el("td", { class: "v", text: r.need }), el("td", { class: "v", text: r.shown }), el("td", { class: r.ok ? "pass" : "fail", text: r.ok ? "✓" : "✗" }))));
+  const fails = res.rows.filter(r => !r.ok && r.why);
+  return el("div", { class: "fb" },
+    el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", { text: "检查项" }), el("th", { text: "要求" }), el("th", { text: "你的" }), el("th", { "aria-label": "结果" }))), tb)),
+    el("div", { class: "verdict " + (res.demo ? "demo" : res.pass ? "ok" : "no"), text: res.demo ? "试玩结果（不记录）：" + (res.pass ? "达标" : "未达标") : res.pass ? "✓ 成绩单全部达标" : "✗ 还有 " + fails.length + " 项没达标" }),
+    fails.length ? el("ul", { class: "reasons" }, fails.map(r => el("li", { text: "❌ " + r.why }))) : null,
+    res.notes?.length ? el("ul", { class: "reasons" }, res.notes.map(n => el("li", { class: "note", text: "裁判提示：" + n }))) : null);
+}
+function feedbackBlock(ai) {
+  return el("div", { class: "fb" },
+    el("div", { class: "verdict " + (ai.pass ? "ok" : "no"), text: (ai.pass ? "通过" : "未通过") + " · " + ai.score + " 分" }),
+    ai.feedback ? el("p", { text: ai.feedback }) : null,
+    ai.strengths?.length ? el("div", {}, el("strong", { text: "做得好" }), el("ul", {}, ai.strengths.map(t => el("li", { text: t })))) : null,
+    ai.gaps?.length ? el("div", {}, el("strong", { text: "要补的" }), el("ul", {}, ai.gaps.map(t => el("li", { text: t })))) : null);
+}
+function historyBox(x) {
+  const h = x.history || [];
+  const typeName = { report: "成绩单", text: "书面材料", defense: "答辩" };
+  return el("section", { class: "sec" }, el("h2", { text: "提交历史" }),
+    h.length ? el("div", { class: "box" }, el("div", { class: "scroll" }, el("table", { id: "history" },
+      el("thead", {}, el("tr", {}, el("th", { text: "时间" }), el("th", { text: "类型" }), el("th", { text: "结果" }), el("th", { text: "说明" }))),
+      el("tbody", {}, h.map(e => el("tr", {}, el("td", { class: "v", text: fmtTime(e.at) }), el("td", { text: typeName[e.type] || e.type }),
+        el("td", { class: e.pass ? "pass" : "fail", text: e.pass ? "✓ 通过" : "✗ 未过" }),
+        el("td", { text: e.type === "report" ? (e.pass ? "全部达标" : (e.reasons || []).join(" ")) : (e.score != null ? "考官 " + e.score + " 分" : "") + (e.migrated ? "（从 v2 存档迁移）" : "") })))))),
+      el("p", { class: "small", text: "保留最近 " + HIST_MAX + " 次正式判定。试玩不计入。" }))
+    : el("div", { class: "empty", text: "还没有正式提交。领码、跑裁判、交成绩单之后，每次判定都会记在这里。" }));
+}
+
+function aside(s, open, x) {
+  const [cls, label] = status(s);
+  const rows = [["状态", label], ["能力", s.key], ["难度", s.diff]];
+  if (s.budget) rows.push(["算力预算", "T4 " + s.budget.t4 + " / Mac " + s.budget.mac + " 分钟"]);
+  if (s.world) rows.push(["建议先完成", "世界 " + s.world]);
+  if (s.id !== "def") rows.push(["裁判版本", s.judge ? "v" + s.judge : "未发布"]);
+  if (!open) rows.push(["解锁条件", "通过阶段" + prevOf(s).no]);
+  if (x.passedAt) rows.push(["通关日期", x.passedAt]);
+  return el("aside", { class: "aside" },
+    el("div", { class: "box" }, el("h3", { text: "阶段详情" }), el("dl", { class: "dl" }, rows.flatMap(([a, c]) => [el("dt", { text: a }), el("dd", { class: a === "状态" ? (cls === "passed" ? "pass" : "") : "", text: c })]))),
+    el("div", { class: "box" }, el("h3", { text: s.id === "def" ? "通过条件" : "三样证据" }), el("ul", { class: "checks" },
+      evidence(s.id).map(e => el("li", { class: e.ok ? "pass" : "", text: (e.ok ? "✓ " : "○ ") + e.label + (s.id === "def" ? "：每题 ≥ 60，平均 ≥ 70" : "") })))));
+}
+
+/* ---------- 答辩（沿用 v2） ---------- */
+function defensePanel(open) {
+  const x = S.stages.def || {}, L = local.def || {};
+  const p = el("div", { class: "pn" }, el("h4", {}, el("span", { text: "答辩" }), x.defense ? el("span", { class: x.defense.pass ? "pass" : "fail", text: "平均 " + x.defense.avg + " 分" }) : null));
+  if (!open) { p.append(el("p", { class: "small", text: "前五个阶段全部通关后开放。题目来自你自己交的材料。" })); return p; }
+  const why = aiUnavailable();
+  if (why) { p.append(el("p", { class: "small", text: why })); return p; }
+  const qs = x.questions;
+  if (!qs) {
+    p.append(el("p", { class: "small", text: "点开始后，考官读你五个阶段的书面材料并出题。" }),
+      el("div", { class: "row" }, el("button", { class: "primary", type: "button", text: L.busy ? "考官出题中…" : "开始答辩", disabled: !!L.busy, onclick: async () => {
+        local.def = { busy: true }; render();
+        const mats = STAGES.map(s2 => "【" + s2.key + "】" + (S.stages[s2.id]?.aiText || "").slice(0, 2500)).join("\n\n");
+        try {
+          const q = await sample.json(`你是大模型工程师毕业答辩的考官。下面是学员五个阶段提交的材料。出 4 道答辩题：至少 2 道针对学员自己材料里的具体做法或数字追问"为什么"，其余考核心原理（如注意力缩放、loss 变 NaN 的排查顺序、LoRA 的原理与 rank 取舍）。题目要能用几段话回答。
+只回复 JSON 数组，每项 {"q": "题目", "from": "出处，如 阶段三 或 原理"}。
+
+${mats}`, { modelTier: "default" });
+          const list = (Array.isArray(q) ? q : []).slice(0, 4).map(o => ({ q: String(o?.q || ""), from: String(o?.from || "") })).filter(o => o.q);
+          if (list.length !== 4) throw { code: "题目数量不对" };
+          local.def = {}; Object.assign(st("def"), { questions: list, defense: null }); recompute("def"); persist(); render();
+        } catch (err) { local.def = { err: aiErr(err) }; render(); }
+      } })), L.err ? el("p", { class: "err", text: L.err }) : null);
+    return p;
+  }
+  p.append(el("div", { class: "qa" }, qs.map((o, i) => el("div", {}, el("p", { class: "q" }, (i + 1) + ". " + o.q, el("span", { class: "from", text: o.from })),
+    el("textarea", { id: "ans-" + i, placeholder: "用你自己的话回答", "aria-label": "第 " + (i + 1) + " 题回答" })))));
+  const d = x.defense;
+  p.append(el("div", { class: "row" },
+    el("button", { class: "primary", type: "button", text: L.busy ? "评分中…" : "交卷", disabled: !!L.busy, onclick: async () => {
+      const answers = qs.map((_, i) => ($("#ans-" + i)?.value || "").trim());
+      if (answers.some(a => a.length < 20)) { local.def = { err: "每道题至少写 20 个字。" }; render(); return; }
+      local.def = { busy: true }; render();
+      try {
+        const r = await sample.json(`你是大模型工程师毕业答辩考官。逐题给学员的回答打分（0-100），标准：原理是否正确、是否用自己的话讲清楚、是否结合了具体例子或数据。背诵式空话不超过 50 分。
+只回复 JSON 数组，每项 {"score": 整数, "comment": "一两句点评，指出对的和缺的"}，顺序与题目一致。
+
+${qs.map((o, i) => "题目 " + (i + 1) + "：" + o.q + "\n回答：" + answers[i].slice(0, 3000)).join("\n\n")}`, { modelTier: "default" });
+        const items = qs.map((_, i) => ({ score: Math.max(0, Math.min(100, Math.round(Number(r?.[i]?.score) || 0))), comment: String(r?.[i]?.comment || "") }));
+        const avg = Math.round(items.reduce((a, o) => a + o.score, 0) / items.length);
+        const res = { items, avg, pass: avg >= 70 && items.every(o => o.score >= 60) };
+        local.def = {}; st("def").defense = res; addHist("def", { type: "defense", pass: res.pass, score: avg }); recompute("def"); persist(); render();
+      } catch (err) { local.def = { err: aiErr(err) }; render(); }
+    } }),
+    el("button", { type: "button", text: "换一组题", disabled: !!L.busy, onclick: () => { Object.assign(st("def"), { questions: null, defense: null }); qs.forEach((_, i) => delete drafts["ans-" + i]); recompute("def"); persist(); render(); } })),
+    L.err ? el("p", { class: "err", text: L.err }) : null,
+    d ? el("div", { class: "fb" }, el("div", { class: "verdict " + (d.pass ? "ok" : "no"), text: (d.pass ? "答辩通过" : "答辩未通过") + " · 平均 " + d.avg + " 分" }),
+      el("ul", {}, (d.items || []).map((it, i) => el("li", { text: "第 " + (i + 1) + " 题 " + it.score + " 分：" + it.comment })))) : null);
+  return p;
+}
+
+/* ---------- 作品集 ---------- */
+function portfolioData() {
+  return ALL.filter(s => passed(s.id)).map(s => {
+    const x = S.stages[s.id];
+    return { id: s.id, no: s.no, key: s.key, title: s.title, date: x.passedAt, repo: x.repo || "", hash: x.auto?.codeHash || "", device: x.auto?.device || "",
+      metrics: (x.auto?.rows || []).filter(r => r.label !== "挑战码").map(r => r.label + "：" + r.shown),
+      score: s.id === "def" ? x.defense?.avg : x.ai?.score, feedback: s.id === "def" ? "" : (x.ai?.feedback || ""),
+      excerpt: s.id === "def" ? "" : (x.aiText || "").slice(0, 300) };
+  });
+}
+function viewPortfolio() {
+  const items = portfolioData();
+  const name = el("input", { type: "text", id: "pfName", placeholder: "署名（显示在作品集上）", maxlength: "40", value: S.name || "", style: "max-width:260px", "aria-label": "署名" });
+  name.addEventListener("change", () => { S.name = name.value.trim().slice(0, 40); persist(); });
+  const list = el("div", { class: "pf" });
+  if (!items.length) list.append(el("div", { class: "empty", text: "还没有通过的阶段。通过阶段一后，第一张作品卡会出现在这里。" }));
+  for (const it of items) list.append(el("article", { class: "pf-card" },
+    el("div", { class: "small mono", text: (it.id === "def" ? "答辩" : "S" + it.id.slice(1) + " · " + it.key) + " · " + (it.date || "") }),
+    el("h3", { text: it.title }),
+    el("div", { class: "meta" }, it.score != null ? el("span", { text: (it.id === "def" ? "答辩均分 " : "考官评分 ") + it.score }) : null,
+      it.device ? el("span", { text: "设备：" + it.device }) : null, it.hash ? el("span", { class: "mono", text: "代码指纹 " + it.hash }) : null,
+      it.repo && repoOk(it.repo) ? el("a", { href: it.repo, target: "_blank", rel: "noopener", text: it.repo.replace("https://github.com/", "") }) : null),
+    it.metrics.length ? el("div", { class: "small", text: it.metrics.join("　·　") }) : null,
+    it.feedback ? el("p", { text: "考官：" + it.feedback }) : null,
+    it.excerpt ? el("div", { class: "excerpt", text: it.excerpt + (it.excerpt.length >= 300 ? "…" : "") }) : null,
+    seal(it.date)));
+  return [el("a", { class: "back", href: "#", text: "← 返回总览" }),
+    el("div", {}, el("h1", { text: "我的作品集" }), el("p", { class: "lede", text: "每通过一个阶段，这里自动加一张卡片。导出后是一个独立的网页文件，所有内容都在文件里，可以发给别人或放进简历。" })),
+    el("div", { class: "toolbar" }, el("div", { class: "row", style: "flex:1" }, name), el("button", { class: "primary", type: "button", id: "btnPortfolio", text: "导出作品集网页", onclick: e => { S.name = name.value.trim().slice(0, 40); persist(); saveFile("llm-portfolio.html", portfolioHtml(), e.currentTarget); } })),
+    list, footer()];
+}
+function portfolioHtml() {
+  const items = portfolioData(), name = esc(S.name || "未署名");
+  const cards = items.map(it => `<article><p class="k">${it.id === "def" ? "答辩" : "阶段" + esc(it.no) + " · " + esc(it.key)} · ${esc(it.date)}</p><h2>${esc(it.title)}</h2>
+<p class="m">${it.score != null ? "评分 " + esc(it.score) + " · " : ""}${it.device ? "设备 " + esc(it.device) + " · " : ""}${it.hash ? "代码指纹 <code>" + esc(it.hash) + "</code>" : ""}</p>
+${it.repo && repoOk(it.repo) ? `<p><a href="${esc(it.repo)}">${esc(it.repo)}</a></p>` : ""}
+${it.metrics.length ? `<ul>${it.metrics.map(t => "<li>" + esc(t) + "</li>").join("")}</ul>` : ""}
+${it.feedback ? `<p>考官评语：${esc(it.feedback)}</p>` : ""}${it.excerpt ? `<blockquote>${esc(it.excerpt)}</blockquote>` : ""}</article>`).join("\n");
+  return `<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${name} · 挑战大模型工程师 · 作品集</title>
+<style>:root{color-scheme:light dark}body{font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 16px;color:#09090b;background:#fafafa;line-height:1.7}
+@media (prefers-color-scheme:dark){body{color:#fafafa;background:#09090b}article{background:#18181b!important;border-color:#27272a!important}.k,.m,blockquote{color:#a1a1aa!important}a{color:#60a5fa!important}}
+h1,h2{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;letter-spacing:-.02em}h1{font-size:34px;margin:0}h2{font-size:20px;margin:4px 0}article{border:1px solid #e4e4e7;border-radius:14px;padding:16px 20px;margin:18px 0;background:#fff}
+.k,.m{color:#52525b;font-size:13px;margin:0}blockquote{margin:8px 0 0;padding-left:12px;border-left:3px solid #d4d4d8;color:#52525b;white-space:pre-wrap;font-size:14px}a{color:#2563eb}code{font-size:12px}</style></head>
+<body><p class="k">挑战大模型工程师 · 毕业考核作品集</p><h1>${name}</h1><p>已通过 ${items.length} / ${ALL.length} 项考核。每一项都附有公开仓库和代码指纹，可以克隆后自行复现。导出时间：${esc(new Date().toISOString().slice(0, 10))}</p>
+${cards || "<p>还没有通过的阶段。</p>"}</body></html>`;
+}
+
+/* ---------- 备份 ---------- */
+async function saveFile(filename, data, btn) {
+  if (!downloads) { btn.textContent = capsReady ? "这个视图不能保存文件" : "正在连接，稍后再试"; return; }
+  try { await downloads.save({ filename, data }); } catch (e) { if (e?.code !== "declined") btn.textContent = "保存没有完成"; }
+}
+$("#importFile").addEventListener("change", async e => {
+  const f = e.target.files?.[0]; if (!f) return;
+  try { const x = JSON.parse(await f.text()); const from = x?.v || 2; S = migrate(x); persist(); render(); note("备份已导入" + (from < 3 ? "（已从 v2 格式升级）" : "") + "。", false); }
+  catch { note("这个文件不是毕业考核的备份。", true); }
+  e.target.value = "";
+});
+function note(t, warn) { const n = $("#modeNote"); n.className = "notice" + (warn ? " warn" : ""); n.textContent = t; }
+
+/* ---------- 渲染 ---------- */
+const app = $("#app");
+app.addEventListener("input", e => { const t = e.target; if (t.id && (t.tagName === "TEXTAREA" || t.type === "text" || t.type === "url")) drafts[t.id] = t.value; });
+let lastRoute = null;
+function render() {
+  const r = route();
+  const s = byId(r);
+  document.title = s ? s.title + " · 挑战大模型工程师" : r === "portfolio" ? "我的作品集 · 挑战大模型工程师" : "挑战大模型工程师";
+  app.replaceChildren(...(s ? viewStage(s) : r === "portfolio" ? viewPortfolio() : viewHome()));
+  for (const [id, v] of Object.entries(drafts)) { const t = document.getElementById(id); if (t && t.type !== "file") t.value = v; }
+  if (r !== lastRoute) { lastRoute = r; window.scrollTo(0, 0); }
+}
+window.addEventListener("hashchange", render);
+render();
+if (!storageOk) note("这个浏览器不允许本地存储，关闭页面后进度会丢失。请随时导出备份。", true);
+
+(async () => {
+  const use = n => (window.claude && typeof claude.use === "function") ? claude.use(n).catch(e => { if (n === "sample" && e?.code === "not_granted") sampleDenied = true; return null; }) : Promise.resolve(null);
+  const [db, smp, dl, usr] = await Promise.all([use("db"), use("sample"), use("downloads"), use("user")]);
+  sample = smp; downloads = dl; capsReady = true;
+  let owner = false;
+  try { owner = (await usr?.isOwner()) === true; } catch {}
+  if (owner && db) {
+    ownerDb = db;
+    try {
+      const snap = await db.doc("exam/state").get();
+      const remote = snap.exists ? snap.data() : null;
+      if (remote?.kind === "llm-grad-backup" && (remote.updatedAt || 0) > (S.updatedAt || 0)) { S = migrate(remote); try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch {} }
+    } catch {}
+    if (storageOk) note("你是本页作者：进度同时同步到存档，换设备也能看到，Claude 也能读到。", false);
+  }
+  render();
+})();
+}
+</script>
+</body>
+</html>
